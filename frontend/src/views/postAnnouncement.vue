@@ -82,7 +82,6 @@ const handleImage = (e) => {
   const file = e.target.files[0]
   if (file) {
     console.log('Selected image:', file.name)
-    // You can use FormData to handle the image upload too
   }
 }
 

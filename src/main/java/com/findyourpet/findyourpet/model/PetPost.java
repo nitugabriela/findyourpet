@@ -11,7 +11,7 @@ public class PetPost {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String type; // "lost" or "found"
+    private String type;
     private String petType;
     private String description;
     private String location;
