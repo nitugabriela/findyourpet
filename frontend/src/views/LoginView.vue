@@ -1,18 +1,12 @@
-<script setup>
-import { useRouter } from 'vue-router';
-
-const router = useRouter();
-
-function handleLogin() {
-  router.push('/dashboard');
-}
-</script>
-
 <template>
   <div class="app-container">
     <div class="login-container">
       <div class="login-card">
         <h2 class="login-title">Login</h2>
+
+        <div v-if="error" class="error-message">
+          {{ error }}
+        </div>
 
         <div class="form-group">
           <label for="email">Email or phone number:</label>
@@ -41,7 +35,7 @@ function handleLogin() {
         </div>
 
         <div class="login-actions">
-          <button class="login-button" @click="handleLogin">Log In</button>
+          <button class="login-button" @click="login">Log In</button>
           <router-link to="/register" class="create-account">Create an account</router-link>
         </div>
       </div>
@@ -50,6 +44,7 @@ function handleLogin() {
 </template>
 
 <script>
+import axios from 'axios';
 
 export default {
   name: 'LoginPage',
@@ -63,26 +58,50 @@ export default {
     }
   },
   methods: {
-    // loginView.vue methods section
     login() {
+      console.log("Login button clicked...");
+
       if (!this.credentials.username || !this.credentials.password) {
         this.error = 'Please enter both username and password';
         return;
       }
 
-      this.axios.post('http://localhost:2222/auth/login', {
+      axios.post('http://localhost:2222/auth/login', {
         email: this.credentials.username,
         password: this.credentials.password
       })
       .then(response => {
-        localStorage.setItem('user', JSON.stringify(response.data));
-        this.$router.push('/dashboard');
+        console.log("Login success:", response.data);
+
+        const user = response.data;
+
+        localStorage.setItem('userData', JSON.stringify(user));
+
+        localStorage.setItem('userToken', 'session-active');
+
+        window.dispatchEvent(new Event('auth-change'));
+
+        if (user.role === 'ADMIN') {
+            this.$router.push('/dashboard');
+        } else {
+            this.$router.push('/');
+        }
       })
       .catch(error => {
-        this.error = 'Invalid login.';
+        console.error("Login Error:", error);
+        if (error.response) {
+          if (error.response.status === 401) {
+            this.error = 'Invalid email or password.';
+          } else if (error.response.status === 404) {
+            this.error = 'User not found.';
+          } else {
+            this.error = 'Login failed. Server responded with status ' + error.response.status;
+          }
+        } else {
+          this.error = 'Network error or server is offline.';
+        }
       });
     }
-
   }
 }
 </script>
@@ -169,6 +188,12 @@ export default {
 .create-account {
   color: #4361ee;
   text-decoration: none;
+  font-size: 14px;
+}
+
+.error-message {
+  color: red;
+  margin-bottom: 15px;
   font-size: 14px;
 }
 
