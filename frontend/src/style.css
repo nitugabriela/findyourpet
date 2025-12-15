@@ -1,0 +1,137 @@
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  color: #333;
+  background-color: #f7f7f8;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  display: block;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+.card {
+  padding: 2em;
+}
+
+#app {
+  max-width: none;
+  margin: auto;
+  background-color: #f7f7f8;
+}
+
+.topbar {
+  background-color: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.topbar .nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.topbar input {
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  outline: none;
+  width: 250px;
+}
+
+.btn-post {
+  background-color: #4c6ef5;
+  color: white;
+  padding: 0.4rem 1rem;
+  border: none;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+main.content {
+  display: flex;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.left-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dog-img {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 8px;
+}
+
+.contact-section {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.btn-contact {
+  background-color: #4c6ef5;
+  color: white;
+  padding: 0.4rem 1.2rem;
+  border: none;
+  border-radius: 20px;
+  margin-top: 0.5rem;
+}
+
+.right-column {
+  flex: 2;
+}
+
+.right-column h2 {
+  margin-bottom: 0.2rem;
+}
+
+.posted-by {
+  color: #777;
+  margin-bottom: 1.5rem;
+}
+
+.map-img {
+  width: 100%;
+  max-width: 500px;
+  margin-top: 1rem;
+  border-radius: 8px;
+}
+
+
+
+
