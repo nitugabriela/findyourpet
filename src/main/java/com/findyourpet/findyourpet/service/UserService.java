@@ -25,7 +25,9 @@ public class UserService {
             throw new RuntimeException("Email already exists");
         }
 
-        user.setRole("USER");
+        if (user.getRole() == null || user.getRole().isEmpty()) {
+            user.setRole("USER");
+        }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return repository.save(user);

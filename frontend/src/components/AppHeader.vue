@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 const isLoggedIn = ref(false);
 const userName = ref('');
+const isAdmin = ref(false);
 
 const checkLoginStatus = () => {
   const token = localStorage.getItem('userToken');
@@ -13,13 +14,17 @@ const checkLoginStatus = () => {
   if (token && user) {
     isLoggedIn.value = true;
     try {
-      userName.value = JSON.parse(user).name;
+      const userData = JSON.parse(user);
+      userName.value = userData.name;
+      isAdmin.value = userData.role === 'ADMIN';
     } catch (e) {
       userName.value = 'User';
+      isAdmin.value = false;
     }
   } else {
     isLoggedIn.value = false;
     userName.value = '';
+    isAdmin.value = false;
   }
 };
 
@@ -27,6 +32,7 @@ const handleLogout = () => {
   localStorage.removeItem('userToken');
   localStorage.removeItem('userData');
   isLoggedIn.value = false;
+  isAdmin.value = false;
   router.push('/login');
 };
 
@@ -66,6 +72,9 @@ onUnmounted(() => {
 
       <nav class="nav-section">
         <router-link to="/" class="nav-link hide-mobile">Home</router-link>
+
+        <router-link v-if="isAdmin" to="/dashboard" class="nav-link" style="color: #ef4444;">Dashboard</router-link>
+
         <router-link to="/post" class="btn-primary">Post Announcement</router-link>
 
         <div class="divider"></div>
