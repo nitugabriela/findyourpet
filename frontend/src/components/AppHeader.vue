@@ -3,7 +3,6 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
-const searchInput = ref('');
 const isLoggedIn = ref(false);
 const userName = ref('');
 
@@ -13,7 +12,11 @@ const checkLoginStatus = () => {
 
   if (token && user) {
     isLoggedIn.value = true;
-    userName.value = JSON.parse(user).name; // Optional: Get user's name
+    try {
+      userName.value = JSON.parse(user).name;
+    } catch (e) {
+      userName.value = 'User';
+    }
   } else {
     isLoggedIn.value = false;
     userName.value = '';
@@ -23,18 +26,12 @@ const checkLoginStatus = () => {
 const handleLogout = () => {
   localStorage.removeItem('userToken');
   localStorage.removeItem('userData');
-
   isLoggedIn.value = false;
-
   router.push('/login');
 };
 
 function goToBrowse() {
-  if (searchInput.value.trim()) {
-    router.push({ path: '/browse', query: { q: searchInput.value } });
-  } else {
-    router.push('/browse');
-  }
+  router.push('/browse');
 }
 
 onMounted(() => {
@@ -48,70 +45,263 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <header class="topbar">
-    <div class="left-section">
-      <div class="logo-container">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="paw-icon">
-          <path d="M9.196 6.704c.265 1.308-.97 2.982-2.753 3.734-1.783.752-3.443.302-3.708-1.006-.265-1.308.97-2.982 2.753-3.734 1.783-.752 3.443-.302 3.708 1.006zm2.757-2.095c.265 1.308-.97 2.982-2.753 3.734-1.783.752-3.443.302-3.708-1.006-.265-1.308.97-2.982 2.753-3.734 1.783-.752 3.443-.302 3.708 1.006zm3.212 7.564c-1.783.752-3.443.302-3.708-1.006-.265-1.308.97-2.982 2.753-3.734 1.783-.752 3.443-.302 3.708 1.006.265 1.308-.97 2.982-2.753 3.734zm4.497-2.582c-1.783.752-3.443.302-3.708-1.006-.265-1.308.97-2.982 2.753-3.734 1.783-.752 3.443-.302 3.708 1.006.265 1.308-.97 2.982-2.753 3.734zm.326 6.949c-.674 1.157-2.714 1.157-4.549 0-1.835-1.157-2.775-3.033-2.101-4.19.674-1.157 2.714-1.157 4.549 0 1.835 1.157 2.775 3.033 2.101 4.19zm-7.678 4.615c-.674 1.157-2.714 1.157-4.549 0-1.835-1.157-2.775-3.033-2.101-4.19.674-1.157 2.714-1.157 4.549 0 1.835 1.157 2.775 3.033 2.101 4.19z" />
-        </svg>
-        <span class="logo-text">FindYourPet</span>
-      </div>
-      <router-link to="/" class="nav-link">Home Page</router-link>
-    </div>
+  <header class="app-header">
+    <div class="header-content">
 
-    <div class="search-container">
-      <input
-        type="text"
-        placeholder="Address, ad number, breed, etc."
-        class="search-input"
-        v-model="searchInput"
-        @keyup.enter="goToBrowse"
-      />
-    </div>
-
-    <div class="right-section">
-      <router-link to="/post" class="btn-post">Post Announcement</router-link>
-
-      <div v-if="isLoggedIn" class="user-menu">
-        <span class="welcome-text">Hi, {{ userName }}</span>
-        <button @click="handleLogout" class="logout-link">Log out</button>
+      <div class="brand-section" @click="router.push('/')">
+        <div class="logo-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5.5-2.5l7.51-3.49L17.5 6.5 9.99 9.99 6.5 17.5zm5.5-6.6c.61 0 1.1.49 1.1 1.1s-.49 1.1-1.1 1.1-1.1-.49-1.1-1.1.49-1.1 1.1-1.1z"/>
+          </svg>
+        </div>
+        <span class="brand-name">FindYourPet</span>
       </div>
 
-      <router-link v-else to="/login" class="login-link">Log in</router-link>
+      <div class="search-trigger-container">
+        <button @click="goToBrowse" class="search-trigger-btn">
+          <span class="search-icon">🔍</span>
+          <span class="search-text">Find a pet nearby</span>
+        </button>
+      </div>
+
+      <nav class="nav-section">
+        <router-link to="/" class="nav-link hide-mobile">Home</router-link>
+        <router-link to="/post" class="btn-primary">Post Announcement</router-link>
+
+        <div class="divider"></div>
+
+        <div v-if="isLoggedIn" class="user-menu">
+          <div class="user-avatar">
+            {{ userName.charAt(0).toUpperCase() }}
+          </div>
+          <div class="user-info">
+            <span class="user-name">{{ userName }}</span>
+            <button @click="handleLogout" class="logout-text">Log out</button>
+          </div>
+        </div>
+
+        <div v-else class="auth-buttons">
+          <router-link to="/login" class="nav-link">Log in</router-link>
+          <router-link to="/register" class="btn-secondary">Register</router-link>
+        </div>
+      </nav>
+
     </div>
   </header>
 </template>
 
 <style scoped>
-.topbar { background-color: #ffffff; display: flex; align-items: center; padding: 0.8rem 2rem; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); }
-.left-section { display: flex; align-items: center; min-width: 220px; }
-.logo-container { display: flex; align-items: center; margin-right: 1.5rem; }
-.paw-icon { width: 24px; height: 24px; color: #4361ee; }
-.logo-text { font-weight: bold; font-size: 16px; margin-left: 8px; }
-.nav-link { text-decoration: none; color: #333; font-size: 14px; }
-.search-container { flex: 1; margin: 0 1.5rem; }
-.search-input { width: 100%; padding: 0.6rem 1rem; border-radius: 20px; border: none; background-color: #f5f5f5; font-size: 14px; }
-.right-section { display: flex; align-items: center; gap: 1.5rem; min-width: 220px; justify-content: flex-end; }
-.btn-post { background-color: #4361ee; color: white; padding: 0.6rem 1.2rem; border: none; border-radius: 20px; font-weight: 500; text-decoration: none; font-size: 14px; }
-.login-link { text-decoration: none; color: #333; font-size: 14px; }
+.app-header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #f0f0f0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+}
 
-.user-menu { display: flex; align-items: center; gap: 1rem; }
-.welcome-text { font-size: 14px; color: #666; font-weight: 500; }
-.logout-link {
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.brand-section:hover {
+  opacity: 0.8;
+}
+
+.logo-icon svg {
+  width: 32px;
+  height: 32px;
+  color: #4f46e5;
+}
+
+.brand-name {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #1f2937;
+  letter-spacing: -0.5px;
+  font-family: 'Segoe UI', sans-serif;
+}
+.search-trigger-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 0 20px;
+}
+
+.search-trigger-btn {
+  background-color: white;
+  border: 2px solid #4f46e5;
+  color: #4f46e5;
+  padding: 10px 28px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 700;
+  font-size: 0.95rem;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.15);
+}
+
+.search-trigger-btn:hover {
+  background-color: #4f46e5;
+  color: white;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+  transform: translateY(-1px);
+}
+
+.search-icon {
+  font-size: 1.1rem;
+}
+
+.nav-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: #4b5563;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: color 0.2s;
+}
+
+.nav-link:hover {
+  color: #4f46e5;
+}
+
+.btn-primary {
+  background-color: #4f46e5;
+  color: white;
+  padding: 8px 18px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: #4338ca;
+}
+
+.btn-secondary {
+  color: #4f46e5;
+  background-color: #eef2ff;
+  padding: 8px 18px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+}
+
+.btn-secondary:hover {
+  background-color: #e0e7ff;
+}
+
+.divider {
+  width: 1px;
+  height: 24px;
+  background-color: #e5e7eb;
+  margin: 0 4px;
+}
+
+/* --- User Menu --- */
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #4f46e5, #818cf8);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.user-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+.logout-text {
+  font-size: 0.75rem;
+  color: #ef4444;
   background: none;
   border: none;
-  color: #ef4444; /* Red color for logout */
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
   padding: 0;
+  cursor: pointer;
+  text-align: left;
 }
-.logout-link:hover { text-decoration: underline; }
+
+.logout-text:hover {
+  text-decoration: underline;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
 
 @media (max-width: 768px) {
-  .topbar { flex-direction: column; padding: 0.8rem 1rem; }
-  .left-section { width: 100%; justify-content: space-between; margin-bottom: 0.8rem; }
-  .search-container { width: 100%; margin: 0.5rem 0; }
-  .right-section { width: 100%; justify-content: space-between; margin-top: 0.8rem; }
+  .header-content {
+    padding: 0 16px;
+  }
+
+  .brand-name {
+    display: none;
+  }
+
+  .hide-mobile {
+    display: none;
+  }
+
+  .search-trigger-container {
+    padding: 0 10px;
+  }
+
+  .search-text {
+    display: none;
+  }
+
+  .search-trigger-btn {
+    width: auto;
+    padding: 10px;
+    border-radius: 50%;
+  }
 }
 </style>
