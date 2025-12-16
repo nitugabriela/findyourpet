@@ -31,7 +31,7 @@
         </div>
 
         <div class="forgot-password">
-          <a href="#" class="forgot-link">Forgot your password?</a>
+          <router-link to="/forgot-password" class="forgot-link">Forgot your password?</router-link>
         </div>
 
         <div class="login-actions">
