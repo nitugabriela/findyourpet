@@ -17,18 +17,20 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 const route = useRoute();
 const mapContainer = ref(null);
 const selectedPet = ref(null);
-const searchQuery = ref(route.query.q || '');
 const markers = [];
+
+const searchQuery = ref(route.query.q || '');
 
 const approvedPosts = ref([]);
 const hardcodedPets = ref([
   {
     id: 1,
+    petType: 'Cat',
     image: grayStripedCatImage,
     description: 'Our indoor cat slipped through a window...',
     features: 'gray, striped',
     location: 'Herăstrău Park, near Șoseaua Nordului',
-    date: 'Mon, 29.04.2025',
+    date: '2025-04-29',
     name: 'Andrei Popescu',
     phone: '0723 456 789',
     email: 'andrei@email.com',
@@ -36,11 +38,12 @@ const hardcodedPets = ref([
   },
   {
     id: 2,
+    petType: 'Cat',
     image: blackWhiteCatImage,
     description: 'Found a young white and black cat...',
     features: 'white, striped',
     location: 'Bulevardul Timișoara, Sector 6',
-    date: 'Tue, 30.04.2025',
+    date: '2025-04-30',
     name: 'Mihai Georgescu',
     phone: '0765 987 654',
     email: 'mihai@email.com',
@@ -48,11 +51,12 @@ const hardcodedPets = ref([
   },
   {
     id: 4,
+    petType: 'Cat',
     image: orangeCatImage,
-    description: 'Leo disappeared during the night. He\'s curious and friendly...',
+    description: 'Leo disappeared during the night...',
     features: 'tiny, orange',
     location: 'Intrarea Violoncelului, Sector 4',
-    date: 'Wed, 31.04.2025',
+    date: '2025-05-01',
     name: 'Ioana Marinescu',
     phone: '0734 222 333',
     email: 'ioana.marinescu@email.com',
@@ -60,11 +64,12 @@ const hardcodedPets = ref([
   },
   {
     id: 5,
+    petType: 'Dog',
     image: puppyImage,
-    description: 'Tasha is missing. She slipped out during renovations...',
+    description: 'Tasha is missing. She slipped out...',
     features: 'gray, striped',
     location: 'Șoseaua Pantelimon, near Mega Mall',
-    date: 'Wed, 31.04.2025',
+    date: '2025-05-01',
     name: 'Vlad Dumitrescu',
     phone: '0788 444 555',
     email: 'vlad.dumitrescu@email.com',
@@ -76,15 +81,32 @@ watch(() => route.query.q, (newVal) => {
   searchQuery.value = newVal || '';
 });
 
-const filteredLocalPets = computed(() => {
+const filteredPets = computed(() => {
   const query = searchQuery.value.trim().toLowerCase();
-  if (!query) return hardcodedPets.value;
 
-  return hardcodedPets.value.filter(pet =>
-      pet.description.toLowerCase().includes(query) ||
-      pet.features?.toLowerCase().includes(query) ||
-      pet.location.toLowerCase().includes(query)
-  );
+  const allPets = [
+    ...hardcodedPets.value,
+    ...approvedPosts.value.map(p => ({
+      ...p,
+      image: p.imageUrl || '/placeholder-paw.png',
+      petType: p.petType || 'Unknown',
+      features: p.petType
+    }))
+  ];
+
+  if (!query) return allPets;
+
+  return allPets.filter(pet => {
+    const searchableText = [
+      pet.petType,
+      pet.description,
+      pet.location,
+      pet.features,
+      pet.name
+    ].join(' ').toLowerCase();
+
+    return searchableText.includes(query);
+  });
 });
 
 const selectPet = (pet) => {
@@ -154,57 +176,46 @@ onMounted(() => {
           <input
               v-model="searchQuery"
               type="text"
-              placeholder="Search by breed, color, or location..."
+              placeholder="Search by breed, color, location, etc..."
           />
           <button class="search-btn">🔍</button>
         </div>
         <div class="results-count">
-          {{ approvedPosts.length + filteredLocalPets.length }} pets found nearby
+          {{ filteredPets.length }} pets found nearby
         </div>
       </div>
 
       <div class="pet-scroll-area">
 
         <div
-            v-for="(post, index) in approvedPosts"
-            :key="'api-'+index"
-            class="pet-card"
-            :class="{ 'active': selectedPet === post }"
-            @click="selectPet(post)"
-        >
-          <div class="card-image">
-            <img :src="post.imageUrl || '/placeholder-paw.png'" alt="Pet" />
-          </div>
-          <div class="card-content">
-            <h3 class="pet-title">{{ post.description.substring(0, 40) }}...</h3>
-            <p class="pet-location">{{ post.location }}</p>
-            <p class="pet-meta" v-if="post.date">{{ new Date(post.date).toLocaleDateString() }}</p>
-            <div class="pet-footer">
-              <span class="contact-tag">{{ post.name }}</span>
-            </div>
-          </div>
-        </div>
+                    v-for="(pet, index) in filteredPets"
+                    :key="pet.id || index"
+                    class="pet-card"
+                    :class="{ 'active': selectedPet === pet }"
+                    @click="selectPet(pet)"
+                >
+                  <div class="card-image">
+                    <img :src="pet.image || pet.imageUrl || '/placeholder-paw.png'" alt="Pet" />
+                  </div>
+                  <div class="card-content">
+                    <h3 class="pet-title">{{ pet.description.substring(0, 40) }}...</h3>
 
-        <div
-            v-for="(pet, index) in filteredLocalPets"
-            :key="'local-'+index"
-            class="pet-card"
-            :class="{ 'active': selectedPet === pet }"
-            @click="selectPet(pet)"
-        >
-          <div class="card-image">
-            <img :src="pet.image" alt="Pet" />
-          </div>
-          <div class="card-content">
-            <h3 class="pet-title">{{ pet.description.substring(0, 40) }}...</h3>
-            <p class="pet-features" v-if="pet.features">{{ pet.features }}</p>
-            <p class="pet-location">{{ pet.location }}</p>
-            <div class="pet-footer">
-              <span class="contact-tag">{{ pet.name }}</span>
-              <span class="phone-tag">{{ pet.phone }}</span>
-            </div>
-          </div>
-        </div>
+                    <p class="pet-features" v-if="pet.petType || pet.features">
+                      {{ pet.petType ? pet.petType + (pet.features ? ' - ' + pet.features : '') : pet.features }}
+                    </p>
+
+                    <p class="pet-location">📍 {{ pet.location }}</p>
+
+                    <p class="pet-meta" v-if="pet.date">
+                      📅 {{ new Date(pet.date).toLocaleDateString() }}
+                    </p>
+
+                    <div class="pet-footer">
+                      <span class="contact-tag">👤 {{ pet.name }}</span>
+                      <span class="contact-tag phone" v-if="pet.phone">📞 {{ pet.phone }}</span>
+                    </div>
+                  </div>
+                </div>
 
       </div>
     </aside>
@@ -373,4 +384,4 @@ onMounted(() => {
   width: 100%;
   height: 100%;
 }
-</style>s
+</style>
